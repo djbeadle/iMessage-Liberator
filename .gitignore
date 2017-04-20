@@ -1,3 +1,6 @@
+# iMessage databases
+*.db
+
 # Logs
 logs
 *.log
