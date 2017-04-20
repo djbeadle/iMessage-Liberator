@@ -11,6 +11,10 @@ npm start
 
 ## Todo:
 
+- config file
+- Automatically load default database
+- Select different iMessage database
+- Support for iMessage "reactions"
 - Add name of message sender somewhere
 - Figure out how the heck group chats work
 - Video attachment support
