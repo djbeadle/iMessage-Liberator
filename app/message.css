@@ -46,6 +46,9 @@ section {
 	border-radius:25px;
 	float: right;
 	max-width: 50%;
+	/* These are technically the same, but use both */
+	overflow-wrap: break-word;
+	word-wrap: break-word;
 		
 	&:before {
 		content:"";
@@ -81,6 +84,9 @@ section {
 	color: black;
   float: left;
   max-width: 50%;
+  	/* These are technically the same, but use both */
+	overflow-wrap: break-word;
+	word-wrap: break-word;
 		
 	&:before {
 		content:"";
