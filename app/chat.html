@@ -15,7 +15,6 @@
         const url = require('url').url;
         var Autolinker = require( 'autolinker' );
         const username = require('username');
-        const shell = require('electron').shell;
 
         const cur_url = new URL(window.location.href);
         const chat_identifier = cur_url.searchParams.get("chat_identifier");
