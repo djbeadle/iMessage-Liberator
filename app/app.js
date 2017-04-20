@@ -1,6 +1,13 @@
 const electron = require('electron');
-
 const app = electron.app;
+
+const Config = require('electron-config');
+const config = new Config();
+
+// Retreive username & store in config
+const username = require('username');
+config.set("username", username.sync());
+config.set("db_path", "/Users/" + config.get("username") + "/Library/Messages/chat_copy.db");
 
 var BrowserWindow = electron.BrowserWindow;
 

@@ -11,22 +11,23 @@
     </div>
     </section>
     <script>
-  //      var config = require('./config');
         var sqlite3 = require("sqlite3").verbose();
         const url = require('url').url;
         var Autolinker = require( 'autolinker' );
-        const username = require('username');
+        
+        const Config = require('electron-config');        
+        const config = new Config();
 
         const cur_url = new URL(window.location.href);
         const chat_identifier = cur_url.searchParams.get("chat_identifier");
         const supported_attachment_types = ["image/png", "image/jpeg", "image/gif"];
-        const path_to_attachments = "file:///Users/" + username.sync();
+        const path_to_attachments = "file:///Users/" + config.get("username");
 
         //document.title = chat_identifier;
         var title = document.getElementById("title");
         title.textContent = chat_identifier;
 
-        var db = new sqlite3.Database('/Users/Djbeadle/Library/Messages/chat_copy.db');
+        var db = new sqlite3.Database(config.get(db_path));
         var special = document.getElementById("special");
         var text = document.createElement("b");
 

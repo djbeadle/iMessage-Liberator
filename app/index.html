@@ -9,8 +9,12 @@
     <ul id="database">
     </ul>
     <script>
+      const Config = require('electron-config');        
+      const config = new Config();
+
       var sqlite3 = require('sqlite3').verbose();
-      var db = new sqlite3.Database('/Users/Djbeadle/Library/Messages/chat_copy.db');
+      var db = new sqlite3.Database(config.get("db_path"));
+
       const URL = require('url').URL;
 
       var relevant_info =
