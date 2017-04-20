@@ -1,5 +1,7 @@
 # iMessage databases
 *.db
+*.db-shm
+*.db-wal
 
 # Logs
 logs
