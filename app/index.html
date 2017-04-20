@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>iMessage Tool</title>
+  </head>
+  <body>
+    <h1>iMessage Tool</h1>
+    <h2><a href="index.html">HOME</a></h2>
+    <ul id="database">
+    </ul>
+    <script>
+      var sqlite3 = require('sqlite3').verbose();
+      var db = new sqlite3.Database('chat.db');
+      const URL = require('url').URL;
+
+      var relevant_info =
+        "select message.handle_id, service_name, is_from_me, chat_identifier, text, date, date_read," +
+        " date_delivered, transfer_name, transfer_state, total_bytes from" +
+        " handle join chat_handle_join on handle.ROWID = chat_handle_join.handle_id" +
+        " join chat on chat_handle_join.chat_id = chat.ROWID" +
+        " join chat_message_join on chat.ROWID = chat_message_join.chat_id" +
+        " join message on chat_message_join.message_id = message.ROWID" +
+        " LEFT OUTER JOIN message_attachment_join on message.ROWID = message_attachment_join.message_id" +
+        " LEFT OUTER JOIN attachment on message_attachment_join.attachment_id = attachment.ROWID" +
+        " where chat_identifier = 'chat695695091753149282'" +
+        " LIMIT -1";
+
+      var distinct_group_id =
+        "select DISTINCT chat_identifier FROM chat;";
+
+      db.serialize(function() {
+        var rows = document.getElementById("database");
+        db.each(distinct_group_id, function(err, row) {
+          var item = document.createElement("li");
+          
+          var link = document.createElement("a");
+          link.setAttribute("href", "chat.html?chat_identifier=" + encodeURIComponent(row.chat_identifier));
+          link.textContent = row.chat_identifier;
+          
+          item.appendChild(link);
+          rows.appendChild(item);
+        });
+      });
+
+      db.close();
+    </script>
+  </body>
+</html>

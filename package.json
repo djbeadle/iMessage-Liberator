@@ -1,0 +1,30 @@
+{
+  "name": "iMessage-Tool",
+  "productName": "iMessage Viewer, Archiver, and Exporter",
+  "description": "An electron app capable of reading directly from iMessage's SQLite database. ",
+  "version": "0.0.1",
+  "author": "Daniel Beadle",
+  "license": "MIT",
+  "main": "app/app.js",
+  "build": {
+    "appId": "com.iMessageTool",
+    "files": [
+      "app/**/*",
+      "node_modules/**/*",
+      "package.json"
+    ]
+  },
+  "scripts": {
+    "postinstall": "install-app-deps",
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "release": "build"
+  },
+  "dependencies": {
+    "sqlite3": "^3.1.8"
+  },
+  "devDependencies": {
+    "electron": "^1.4.10",
+    "electron-builder": "^10.8.1"
+  }
+}

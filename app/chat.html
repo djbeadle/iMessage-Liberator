@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <link rel="stylesheet" type="text/css" href="message.css">
+  </head>
+  <body>
+    <h2><a href="index.html">All Chats</a> <span id="title"></span></h2>
+    <!-- goodbye kitties <img src="http://loremflickr.com/320/240"> -->
+    <section>
+    <div id="special">
+    </div>
+    </section>
+    <script>
+        var sqlite3 = require("sqlite3").verbose();
+        const url = require('url').url;
+        const cur_url = new URL(window.location.href);
+        const chat_identifier = cur_url.searchParams.get("chat_identifier");
+
+        //document.title = chat_identifier;
+        var title = document.getElementById("title");
+        title.textContent = chat_identifier;
+
+        var db = new sqlite3.Database('chat.db');
+        var special = document.getElementById("special");
+        var text = document.createElement("b");
+        
+        process.stdout.write("----\n");
+        process.stdout.write(cur_url + "\n");
+        process.stdout.write(cur_url.searchParams.get("chat_identifier") + "\n");
+        process.stdout.write("----\n");
+
+        // Get the messages we want based on the URL paramater    
+        var chat_id_msgs =
+            " select * from" +
+            " chat join chat_message_join join message" +
+            " where message.ROWID = chat_message_join.message_id" +
+            " AND chat_message_join.chat_id = chat.ROWID" +
+            " AND chat.chat_identifier = '" + chat_identifier + "';";
+
+        process.stdout.write("lets go!\n");
+        db.serialize(function() {
+            var rows = document.getElementById("special");
+            db.each(chat_id_msgs, function(err, row){
+                var from_me = row.is_from_me; // 1 if from me, 0 if not. 
+                var item = document.createElement("div");
+                item.setAttribute("class", from_me ? "me" : "other");
+                
+                const clearing_div = document.createElement("div");
+                clearing_div.setAttribute("class", "clear");
+
+                var paragraph = document.createElement("p");
+                paragraph.textContent = row.text;
+
+                item.appendChild(paragraph);
+                rows.appendChild(item);
+                rows.appendChild(clearing_div);
+            })
+        });
+
+    </script>
+  </body>
+</html>
