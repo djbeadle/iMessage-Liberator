@@ -4,6 +4,10 @@
   "description": "An electron app capable of reading directly from iMessage's SQLite database. ",
   "version": "0.0.1",
   "author": "Daniel Beadle",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/djbeadle/iMessage-Tool.git"
+  },
   "license": "MIT",
   "main": "app/app.js",
   "build": {
