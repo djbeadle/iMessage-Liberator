@@ -23,11 +23,14 @@
         const supported_attachment_types = ["image/png", "image/jpeg", "image/gif"];
         const path_to_attachments = "file:///Users/" + config.get("username");
 
+        const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
         //document.title = chat_identifier;
         var title = document.getElementById("title");
         title.textContent = chat_identifier;
 
-        var db = new sqlite3.Database(config.get(db_path));
+        var db = new sqlite3.Database(config.get("db_path"));
         var special = document.getElementById("special");
         var text = document.createElement("b");
 
@@ -41,10 +44,10 @@
             }
         }   
 
-        process.stdout.write("----\n");
+        /* process.stdout.write("----\n");
         process.stdout.write(cur_url + "\n");
         process.stdout.write(cur_url.searchParams.get("chat_identifier") + "\n");
-        process.stdout.write("----\n");
+        process.stdout.write("----\n"); */
 
         // Get the messages we want based on the URL paramater    
         /* var chat_id_msgs =
@@ -70,21 +73,56 @@
             var rows = document.getElementById("special");
             db.each(chat_id_msgs, function(err, row){
                 var item = document.createElement("div");
-                item.setAttribute("class", row.is_from_me ? "me" : "other"); // 1 if from me, 0 if not. 
                 
-                const clearing_div = document.createElement("div");
+                // Time message was delivered, if available.
+                var delivered_appletime = row.date_delivered;
+                var delivered_humantime;
+                if(delivered_appletime == 0){
+                    delivered_humantime = "?";
+                } else {
+                    delivered_humantime = timestamp_convertor(delivered_appletime);
+                }
+
+                // Time message was read, if available.
+                var read_appletime = row.date_read;
+                var read_humantime;
+                if(read_appletime == 0){
+                    read_humantime = "?";
+                } else {
+                    read_humantime = timestamp_convertor(read_appletime);
+                }
+
+                // Create clearing div
+                var clearing_div = document.createElement("div");
                 clearing_div.setAttribute("class", "clear");
 
+                // create timestamp
+                var timestamp = document.createElement("div");
+                
+                timestamp.innerText = delivered_humantime + " / " + read_humantime
+
+                // set classes based on who the message is from
+                // 1 if from me, 0 if not. 
+                if(row.is_from_me == 1){
+                    item.setAttribute("class", "me"); 
+                    timestamp.setAttribute("class", "timestamp_me");
+                } else {
+                    item.setAttribute("class", "other"); 
+                    timestamp.setAttribute("class", "timestamp_other");
+                }
+
+                // handle image attachments
                 if(row.mime_type != null && supported_attachment_types.indexOf(row.mime_type) != -1){
                     var pic_attachment = document.createElement("img");
-                    process.stdout.write("ATTACHMENT!");
-                    process.stdout.write("" + path_to_attachments + row.filename.substr(1));
+                    // process.stdout.write("ATTACHMENT!");
+                    // process.stdout.write("" + path_to_attachments + row.filename.substr(1));
                     
                     pic_attachment.setAttribute("src", "" + path_to_attachments + row.filename.substr(1));
-                    
 
                     item.appendChild(pic_attachment);
-                } else {
+                }
+                // handle normal messages
+                else {
                     var paragraph = document.createElement("p");
 
                     // process.stdout.write("row.text: " + row.text + "\n");
@@ -93,10 +131,37 @@
                     item.appendChild(paragraph);
                 }
 
+                // Insert text, timestamp, and clearing divs into the page
+                rows.appendChild(timestamp);
                 rows.appendChild(item);
                 rows.appendChild(clearing_div);
             })
         });
+
+        /* Takes in an apple timestamp and converts it to a human readable string. Have to add 978307200 to
+        mactime to get unixtime. */
+        var timestamp_convertor = function(apple_timestamp){
+            var unix_timestamp = apple_timestamp + 978307200;
+            // Create a new JavaScript Date object based on the timestamp
+            // multiplied by 1000 so that the argument is in milliseconds, not seconds.
+            var date = new Date(unix_timestamp*1000);
+            // day of the week, ex: Thursday
+            var week_day = date.getDay();
+            // day of the month, ex 21st
+            var month_day = date.getDate();
+            var year = date.getFullYear();
+            var month = date.getMonth();
+            // Hours part from the timestamp
+            var hours = date.getHours();
+            // Minutes part from the timestamp
+            var minutes = "0" + date.getMinutes();
+            // Seconds part from the timestamp
+            var seconds = "0" + date.getSeconds();
+
+            // Will display time in "Thursday, January 2017 10:30:23" format
+            var formattedTime = days[week_day] + ", "+ months[month] + " " + month_day + " " + year + " " + hours + ':' + minutes.substr(-2) + ':' + seconds.substr(-2);
+            return formattedTime;
+        }
 
     </script>
   </body>
