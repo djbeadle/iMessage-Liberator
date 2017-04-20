@@ -21,7 +21,8 @@
     "release": "build"
   },
   "dependencies": {
-    "sqlite3": "^3.1.8"
+    "sqlite3": "^3.1.8",
+    "username": "^2.3.0"
   },
   "devDependencies": {
     "electron": "^1.4.10",

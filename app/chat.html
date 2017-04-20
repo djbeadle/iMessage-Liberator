@@ -14,7 +14,11 @@
         var sqlite3 = require("sqlite3").verbose();
         const url = require('url').url;
         const cur_url = new URL(window.location.href);
+        const username = require('username');
+        
         const chat_identifier = cur_url.searchParams.get("chat_identifier");
+        const supported_attachment_types = ["image/png", "image/jpeg", "image/gif"];
+        const path_to_attachments = "file:///Users/" + username.sync();
 
         //document.title = chat_identifier;
         var title = document.getElementById("title");
@@ -30,28 +34,49 @@
         process.stdout.write("----\n");
 
         // Get the messages we want based on the URL paramater    
-        var chat_id_msgs =
+        /* var chat_id_msgs =
             " select * from" +
             " chat join chat_message_join join message" +
             " where message.ROWID = chat_message_join.message_id" +
             " AND chat_message_join.chat_id = chat.ROWID" +
-            " AND chat.chat_identifier = '" + chat_identifier + "';";
+            " AND chat.chat_identifier = '" + chat_identifier + "';"; */
+
+        var chat_id_msgs = 
+            "select chat_identifier, service_name, display_name, text, mime_type," +
+            " date_read, date_delivered, is_from_me, filename, transfer_name, total_bytes" +
+            " from chat_handle_join join chat on chat_handle_join.chat_id = chat.ROWID" +
+            " join chat_message_join on chat.ROWID = chat_message_join.chat_id" +
+            " join message on chat_message_join.message_id = message.ROWID" +
+            " LEFT OUTER JOIN message_attachment_join on message.ROWID = message_attachment_join.message_id" +
+            " LEFT OUTER JOIN attachment on message_attachment_join.attachment_id = attachment.ROWID" +
+            " where chat.chat_identifier = '" + chat_identifier + "';";
+            console.log("chat_id_msgs: " + chat_id_msgs);
 
         process.stdout.write("lets go!\n");
         db.serialize(function() {
             var rows = document.getElementById("special");
             db.each(chat_id_msgs, function(err, row){
-                var from_me = row.is_from_me; // 1 if from me, 0 if not. 
                 var item = document.createElement("div");
-                item.setAttribute("class", from_me ? "me" : "other");
+                item.setAttribute("class", row.is_from_me ? "me" : "other"); // 1 if from me, 0 if not. 
                 
                 const clearing_div = document.createElement("div");
                 clearing_div.setAttribute("class", "clear");
 
-                var paragraph = document.createElement("p");
-                paragraph.textContent = row.text;
+                if(row.mime_type != null && supported_attachment_types.indexOf(row.mime_type) != -1){
+                    var pic_attachment = document.createElement("img");
+                    process.stdout.write("ATTACHMENT!");
+                    process.stdout.write("" + path_to_attachments + row.filename.substr(1));
+                    
+                    pic_attachment.setAttribute("src", "" + path_to_attachments + row.filename.substr(1));
+                    
 
-                item.appendChild(paragraph);
+                    item.appendChild(pic_attachment);
+                } else {
+                    var paragraph = document.createElement("p");
+                    paragraph.textContent = row.text;
+                    item.appendChild(paragraph);
+                }
+
                 rows.appendChild(item);
                 rows.appendChild(clearing_div);
             })
