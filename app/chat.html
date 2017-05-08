@@ -58,7 +58,7 @@
             " AND chat.chat_identifier = '" + chat_identifier + "';"; */
 
         var chat_id_msgs = 
-            "select message.guid, chat_identifier, service_name, display_name, text, mime_type," +
+            "select message.guid, message.handle_id, chat_identifier, service_name, display_name, text, mime_type," +
             " date_read, date_delivered, room_name, is_from_me, filename, transfer_name, total_bytes" +
             " from chat_handle_join join chat on chat_handle_join.chat_id = chat.ROWID" +
             " join chat_message_join on chat.ROWID = chat_message_join.chat_id" +
@@ -88,30 +88,27 @@
             })
 
             // Cycle through all of the messages we retreived with chat_id_msgs
+            var last_message_handle = "";
             var last_message_guid = ""; // used if we're in a group chat so we don't display the same message multiple times
 
             db.each(chat_id_msgs, function(err, row){
-                console.log("Current GUID: " + row.guid);
-                console.log("Last GUID: " + last_message_guid);
+                // console.log("Current GUID: " + row.guid);
+                // console.log("Last GUID: " + last_message_guid);
                 if((group_chat == 1) && (row.guid == last_message_guid)){
-                    console.log("Duplicate message!");
+                    // console.log("Duplicate message!");
                 }
                 else {
-                    add_message(rows, row);
+                    add_message(rows, row, last_message_guid);
                 }
                 
                 last_message_guid = row.guid;
             })
         });
 
-
-
-
-
         /* Insert a message onto the page */
-        var add_message = function(rows, row){
+        var add_message = function(rows, row, last_message_handle){
             var item = document.createElement("div");
-                
+
             // Time message was delivered, if available.
             var delivered_appletime = row.date_delivered;
             var delivered_humantime;
@@ -136,7 +133,6 @@
 
             // create timestamp
             var timestamp = document.createElement("div");
-            
             timestamp.innerText = delivered_humantime + " / " + read_humantime
 
             // set classes based on who the message is from
@@ -167,6 +163,18 @@
                 // process.stdout.write("autolinked row.text: " + Autolinker.link(row.text) + "\n");
                 paragraph.innerHTML = Autolinker.link(row.text/*, { className: "open-in-browser" }*/);
                 item.appendChild(paragraph);
+            }
+
+            if(group_chat == 1){
+                // If group chat, put in sender's handle
+                var handle = row.handle_id
+                if (row.is_from_me != 1 && handle != last_message_handle){
+                    var handle_div = document.createElement("div");
+                    handle_div.setAttribute("class", "handle");
+                    handle_div.innerText = handle;
+                    rows.appendChild(handle_div);
+                    last_message_handle = handle;
+                }
             }
 
             // Insert text, timestamp, and clearing divs into the page
