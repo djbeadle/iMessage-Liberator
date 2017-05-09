@@ -30,10 +30,6 @@
         const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
-        //document.title = chat_identifier;
-        // var title = document.getElementById("title");
-        //title.textContent = chat_identifier;
-
         document.title = chat_identifier;
 
         // Load the NavBar before we get into all sorts of disgusting database stuff
@@ -41,7 +37,8 @@
         var el = link.querySelector(".menu");
         document.getElementById("nav").appendChild(el.cloneNode(true));
 
-        var db = new sqlite3.Database(config.get("db_path"));
+        // Okay, here's the database stuff.
+        var db = new sqlite3.Database(config.get("db_path"), sqlite3.OPEN_READONLY);
         var special = document.getElementById("special");
         var text = document.createElement("b");
 

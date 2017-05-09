@@ -15,11 +15,7 @@
       const Config = require('electron-config');        
       const config = new Config();
 
-      var sqlite3 = require('sqlite3').verbose();
-      var db = new sqlite3.Database(config.get("db_path"));
-
       const URL = require('url').URL;
-
 
       // Load the NavBar before we get into all sorts of disgusting database stuff
       var link = document.querySelector('link[rel="import"]').import;
@@ -27,6 +23,9 @@
       document.getElementById("nav").appendChild(el.cloneNode(true));
 
       // Okay, here's all the database stuff
+      var sqlite3 = require('sqlite3').verbose();
+      var db = new sqlite3.Database(config.get("db_path"), sqlite3.OPEN_READONLY);
+      
       var distinct_group_id =
         "select DISTINCT chat_identifier FROM chat;";
 
