@@ -9,17 +9,25 @@ npm install
 npm start
 ```
 
+## Featuers:
+- Can open and display an iMessage database!
+- Support for picture messages!
+- Supports group chats!
+- Display ssent and message read times (if available)!
+
 ## Todo:
 
-- config file
+- config file ✔
 - Automatically load default database
-- Select different iMessage database
+- Select different iMessage database ✔
 - Support for iMessage "reactions"
-- Add name of message sender somewhere
-- Figure out how the heck group chats work
+- Add name of message sender somewhere ✔
+- Figure out how the heck group chats work ✔ (mostly)
 - Video attachment support
 - Make links open in default browser window
 - Enable searching in message log
+- Mass attachment export
+- Load contacts from address book for easier identification
 - **PRINTING TO PDF**
 
 ## Building a release package
