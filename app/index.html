@@ -26,6 +26,7 @@
       var el = link.querySelector(".menu");
       document.getElementById("nav").appendChild(el.cloneNode(true));
 
+      // Okay, here's all the database stuff
       var distinct_group_id =
         "select DISTINCT chat_identifier FROM chat;";
 
