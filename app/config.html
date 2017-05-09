@@ -4,15 +4,22 @@
 <head>
     <title>iMessage Liberator Config</title>
     <link href="general.css" rel="stylesheet">
+    <link rel="import" href="nav.html">
 </head>
 
 <body>
     <h1>iMessage Tool</h1>
-    <h2><a href="index.html">HOME</a></h2>
-    <h3><u>Current Database File:</u></h3>
+
+    <div id="nav"></div>
+
+    <h3>
+        <u>Current Database File:</u>
+    </h3>
     <span id="db_path"></span>
 
-    <h3><u>Select Different Database:</u></h3>
+    <h3>
+        <u>Select Different Database:</u>
+    </h3>
     <span>
         <input type="file" id="uploadInput" onchange="updateSize()" value="">Total size: <span id="fileSize">0</span>
     </span>
@@ -32,6 +39,11 @@
 
         document.getElementById("db_path").innerText = config.get("db_path");
 
+        // Load the NavBar before we get into all sorts of disgusting database stuff
+        var link = document.querySelector('link[rel="import"]').import;
+        var el = link.querySelector(".menu");
+        document.getElementById("nav").appendChild(el.cloneNode(true));
+
         // Blatently stolen from the MDN examples page
         function updateSize() {
             var nBytes = 0,
@@ -50,7 +62,7 @@
             document.getElementById("fileSize").innerHTML = sOutput;
         }
 
-        function updateConfig(){
+        function updateConfig() {
             config.set("db_path", document.getElementById("uploadInput").files[0].path)
             location.reload();
         }

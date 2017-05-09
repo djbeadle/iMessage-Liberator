@@ -2,9 +2,12 @@
 <html>
   <head>
       <link rel="stylesheet" type="text/css" href="message.css">
+      <link rel="import" href="nav.html">
+      <link rel="stylesheet" type="text/css" href="general.css">
+      <title>blank</title>
   </head>
   <body>
-    <h2><a href="index.html">All Chats</a> <span id="title"></span></h2>
+    <div id="nav"></div>
     <!-- goodbye kitties <img src="http://loremflickr.com/320/240"> -->
     <section>
     <div id="special">
@@ -27,8 +30,13 @@
         const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
         //document.title = chat_identifier;
-        var title = document.getElementById("title");
-        title.textContent = chat_identifier;
+        // var title = document.getElementById("title");
+        //title.textContent = chat_identifier;
+
+        // Load the NavBar before we get into all sorts of disgusting database stuff
+        var link = document.querySelector('link[rel="import"]').import;
+        var el = link.querySelector(".menu");
+        document.getElementById("nav").appendChild(el.cloneNode(true));
 
         var db = new sqlite3.Database(config.get("db_path"));
         var special = document.getElementById("special");

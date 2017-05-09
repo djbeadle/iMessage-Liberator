@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>iMessage Tool</title>
+    <title>iMessage Liberator</title>
+    <link href="general.css" rel="stylesheet">
+    <link rel="import" href="nav.html">
   </head>
   <body>
-    <h1>iMessage Tool</h1>
-    <h2><a href="index.html">HOME</a></h2>
-    <ul id="database">
-    </ul>
+    <h1>iMessage Liberator</h1>
+    <div id="nav"></div>
+    <!-- The various chats are added to this element -->
+    <ul id="database"></ul>
+
     <script>
       const Config = require('electron-config');        
       const config = new Config();
@@ -16,6 +19,12 @@
       var db = new sqlite3.Database(config.get("db_path"));
 
       const URL = require('url').URL;
+
+
+      // Load the NavBar before we get into all sorts of disgusting database stuff
+      var link = document.querySelector('link[rel="import"]').import;
+      var el = link.querySelector(".menu");
+      document.getElementById("nav").appendChild(el.cloneNode(true));
 
       var distinct_group_id =
         "select DISTINCT chat_identifier FROM chat;";
