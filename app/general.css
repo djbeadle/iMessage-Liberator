@@ -1,0 +1,14 @@
+.menu li {
+	list-style-type: none;
+	padding: 0;
+	margin: 0;
+    display: inline;
+}
+
+h3 {
+    margin-bottom: 0px;
+}
+
+.db_path {
+    margin: 0;
+}
