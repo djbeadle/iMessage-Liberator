@@ -28,6 +28,7 @@ npm start
 - Enable searching in message log
 - Mass attachment export
 - Load contacts from address book for easier identification
+- Statistics
 - **PRINTING TO PDF**
 
 ## Building a release package
