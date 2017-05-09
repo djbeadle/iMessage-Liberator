@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>iMessage Liberator Config</title>
+    <link href="general.css" rel="stylesheet">
+</head>
+
+<body>
+    <h1>iMessage Tool</h1>
+    <h2><a href="index.html">HOME</a></h2>
+    <h3><u>Current Database File:</u></h3>
+    <span id="db_path"></span>
+
+    <h3><u>Select Different Database:</u></h3>
+    <span>
+        <input type="file" id="uploadInput" onchange="updateSize()" value="">Total size: <span id="fileSize">0</span>
+    </span>
+    <br>
+    <span>
+        <input type="submit" value="Submit" onclick="updateConfig()">
+    </span>
+
+    <script>
+        const Config = require('electron-config');
+        const config = new Config();
+
+        var sqlite3 = require('sqlite3').verbose();
+        const URL = require('url').URL;
+
+        var distinct_group_id = "select DISTINCT chat_identifier FROM chat;";
+
+        document.getElementById("db_path").innerText = config.get("db_path");
+
+        // Blatently stolen from the MDN examples page
+        function updateSize() {
+            var nBytes = 0,
+                oFiles = document.getElementById("uploadInput").files,
+                nFiles = oFiles.length;
+            for (var nFileId = 0; nFileId < nFiles; nFileId++) {
+                nBytes += oFiles[nFileId].size;
+            }
+            var sOutput = nBytes + " bytes";
+            // optional code for multiples approximation
+            for (var aMultiples = ["KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB"], nMultiple = 0, nApprox =
+                    nBytes / 1024; nApprox > 1; nApprox /= 1024, nMultiple++) {
+                sOutput = nApprox.toFixed(3) + " " + aMultiples[nMultiple] + " (" + nBytes + " bytes)";
+            }
+            // end of optional code
+            document.getElementById("fileSize").innerHTML = sOutput;
+        }
+
+        function updateConfig(){
+            config.set("db_path", document.getElementById("uploadInput").files[0].path)
+            location.reload();
+        }
+    </script>
+</body>
+
+</html>
