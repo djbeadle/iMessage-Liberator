@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html>
   <head>
+      <link rel="stylesheet" type="text/css" href="general.css">
       <link rel="stylesheet" type="text/css" href="message.css">
       <link rel="import" href="nav.html">
-      <link rel="stylesheet" type="text/css" href="general.css">
       <title>blank</title>
   </head>
   <body>
+    <h1>iMessage Tool</h1>
     <div id="nav"></div>
     <!-- goodbye kitties <img src="http://loremflickr.com/320/240"> -->
     <section>
@@ -32,6 +33,8 @@
         //document.title = chat_identifier;
         // var title = document.getElementById("title");
         //title.textContent = chat_identifier;
+
+        document.title = chat_identifier;
 
         // Load the NavBar before we get into all sorts of disgusting database stuff
         var link = document.querySelector('link[rel="import"]').import;
