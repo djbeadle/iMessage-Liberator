@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Stats</title>
+    <link href="general.css" rel="stylesheet">
+    <link rel="import" href="nav.html">
+  </head>
+  <body>
+    <h1>iMessage Liberator</h1>
+    <div id="nav"></div>
+    
+    <h3>
+        <u>Number of Messages:</u>
+    </h3>
+    <span id="num_msgs"></span>
+
+    <script>
+      const Config = require('electron-config');        
+      const config = new Config();
+
+      const URL = require('url').URL;
+
+      // Load the NavBar before we get into all sorts of disgusting database stuff
+      var link = document.querySelector('link[rel="import"]').import;
+      var el = link.querySelector(".menu");
+      document.getElementById("nav").appendChild(el.cloneNode(true));
+
+      // Okay, here's all the database stuff
+      var sqlite3 = require('sqlite3').verbose();
+      var db = new sqlite3.Database(config.get("db_path"), sqlite3.OPEN_READONLY);
+      
+      var num_messages = "SELECT COUNT(*) as the_count from message";
+
+      db.serialize(function() {
+        db.get(num_messages, function(err, row) {
+            console.log("row count: " + row.count);
+          document.getElementById("num_msgs").innerText = row.the_count;
+        });
+      });
+
+      db.close();
+    </script>
+  </body>
+</html>

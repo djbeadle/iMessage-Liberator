@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>iMessage Liberator</title>
+    <link href="general.css" rel="stylesheet">
+    <link rel="import" href="nav.html">
+  </head>
+  <body>
+    <h1>iMessage Liberator</h1>
+    <div id="nav"></div>
+    
+    <!-- Starting point. Dynamically generated elements are appeneded onto here. -->
+    <ul id="database"></ul>
+
+    <script>
+      const Config = require('electron-config');        
+      const config = new Config();
+
+      const URL = require('url').URL;
+
+      // Load the NavBar before we get into all sorts of disgusting database stuff
+      var link = document.querySelector('link[rel="import"]').import;
+      var el = link.querySelector(".menu");
+      document.getElementById("nav").appendChild(el.cloneNode(true));
+
+      // Okay, here's all the database stuff
+      var sqlite3 = require('sqlite3').verbose();
+      var db = new sqlite3.Database(config.get("db_path"), sqlite3.OPEN_READONLY);
+      
+      var distinct_group_id =
+        "select DISTINCT chat_identifier FROM chat;";
+
+      db.serialize(function() {
+        var rows = document.getElementById("database");
+        db.each(distinct_group_id, function(err, row) {
+          var item = document.createElement("li");
+          
+          var link = document.createElement("a");
+          link.setAttribute("href", "chat.html?chat_identifier=" + encodeURIComponent(row.chat_identifier));
+          link.textContent = row.chat_identifier;
+          
+          item.appendChild(link);
+          rows.appendChild(item);
+        });
+      });
+
+      db.close();
+    </script>
+  </body>
+</html>
