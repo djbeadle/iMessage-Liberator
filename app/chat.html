@@ -9,7 +9,7 @@
   <body>
     <h1>iMessage Tool</h1>
     <div id="nav"></div>
-    <!-- goodbye kitties <img src="http://loremflickr.com/320/240"> -->
+    <button id="print" onclick="print()">print</button>
     <section>
     <div id="special">
     </div>
@@ -17,7 +17,10 @@
     <script>
         var sqlite3 = require("sqlite3").verbose();
         const url = require('url').url;
-        var Autolinker = require( 'autolinker' );
+        var Autolinker = require('autolinker');
+        const {webContents} = require('electron');
+
+        console.log(webContents);
         
         const Config = require('electron-config');        
         const config = new Config();
@@ -31,6 +34,16 @@
         const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
         document.title = chat_identifier;
+
+        // Print function:
+        var print = function(){
+            mainWindow.webContents.printToPDF({}, function(error, data) {
+                if(error) throw error;
+                fs.writeFile(arg, data, function(error) {
+                    if(error) throw error;
+                });
+            });
+        }
 
         // Load the NavBar before we get into all sorts of disgusting database stuff
         var link = document.querySelector('link[rel="import"]').import;

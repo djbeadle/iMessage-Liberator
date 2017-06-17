@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="general.css">
+		<link rel="stylesheet" type="text/css" href="message.css">
+		<link rel="import" href="nav.html">
+		<title>blank</title>
+	</head>
+	<body>
+		<h1>iMessage Tool</h1>
+		<div id="nav"></div>
+		<button id="print" onclick="print()">print</button>
+		<section>
+			<div id="special">
+			</div>
+		</section>
+		<script>
+var sqlite3 = require("sqlite3").verbose();
+const url = require('url').url;
+var Autolinker = require('autolinker');
+const {webContents} = require('electron');
+
+console.log(webContents);
+
+const Config = require('electron-config');        
+const config = new Config();
+
+const cur_url = new URL(window.location.href);
+const chat_identifier = cur_url.searchParams.get("chat_identifier");
+const supported_attachment_types = ["image/png", "image/jpeg", "image/gif"];
+const path_to_attachments = "file:///Users/" + config.get("username");
+
+const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+document.title = chat_identifier;
+
+// Print function:
+var print = function(){
+	mainWindow.webContents.printToPDF({}, function(error, data) {
+		if(error) throw error;
+		fs.writeFile(arg, data, function(error) {
+			if(error) throw error;
+		});
+	});
+}
+
+// Load the NavBar before we get into all sorts of disgusting database stuff
+var link = document.querySelector('link[rel="import"]').import;
+var el = link.querySelector(".menu");
+document.getElementById("nav").appendChild(el.cloneNode(true));
+
+// Okay, here's the database stuff.
+var db = new sqlite3.Database(config.get("db_path"), sqlite3.OPEN_READONLY);
+var special = document.getElementById("special");
+var text = document.createElement("b");
+
+window.onload = function() {
+	var external_links = document.getElementsByClassName('.open-in-browser');
+	for(var i = 0; i < external_links.length; i++) {
+		var external_link = external_links[i];
+		external_link.onclick = function() {
+			console.log('ho ho ho');
+		}
+	}
+}   
+
+/* process.stdout.write("----\n");
+   process.stdout.write(cur_url + "\n");
+   process.stdout.write(cur_url.searchParams.get("chat_identifier") + "\n");
+   process.stdout.write("----\n"); */
+
+// Get the messages we want based on the URL paramater    
+/* var chat_id_msgs =
+   " select * from" +
+   " chat join chat_message_join join message" +
+   " where message.ROWID = chat_message_join.message_id" +
+   " AND chat_message_join.chat_id = chat.ROWID" +
+   " AND chat.chat_identifier = '" + chat_identifier + "';"; */
+var all_attachments = 
+   " SELECT" + 
+   " created_date, start_date, filename, mime_type, transfer_state, is_outgoing, transfer_name, total_bytes," + 
+   " is_sticker" + 
+   " FROM attachment;";
+
+process.stdout.write("lets go!\n");
+db.serialize(function() {
+	var rows = document.getElementById("special");
+
+	// Get info about this particular chat
+	db.each(all_attachments, function(err, row){
+		// console.log(row.transfer_name);
+		var paragraph = document.createElement("p");
+		var line_item = document.createElement("a");
+		var text = "";
+		if(row.is_from_me == 1){
+			text += "From me: ";
+		} else {
+			text += "To me: ";
+		}
+		text += " ";
+		text += row.mime_type;
+		text += " ";
+		line_item.setAttribute("href", "" + path_to_attachments + row.filename.substr(1));
+		line_item.innerHTML = text;
+		paragraph.appendChild(line_item);
+		rows.appendChild(paragraph);
+	})
+
+});
+
+/* Insert a message onto the page */
+var add_attachment = function(rows, row, last_message_handle){
+	console.log("adding attachments!");
+	var item = document.createElement("div");
+
+	// Time message was delivered, if available.
+	var delivered_appletime = row.created_date;
+	var delivered_humantime;
+	if(delivered_appletime == 0){
+		delivered_humantime = "?";
+	} else {
+		delivered_humantime = timestamp_convertor(delivered_appletime);
+	}
+
+
+	// Create clearing div
+	var clearing_div = document.createElement("div");
+	clearing_div.setAttribute("class", "clear");
+
+	// create timestamp
+	var timestamp = document.createElement("div");
+	timestamp.innerText = delivered_humantime + " / " + read_humantime
+
+		// set classes based on who the message is from
+		// 1 if from me, 0 if not. 
+		if(row.is_from_me == 1){
+			item.setAttribute("class", "me"); 
+			timestamp.setAttribute("class", "timestamp_me");
+		} else {
+			item.setAttribute("class", "other"); 
+			timestamp.setAttribute("class", "timestamp_other");
+		}
+
+	// handle normal messages
+	var paragraph = document.createElement("a");
+	paragraph.setAttribute("src", row.filename);
+	paragraph.innerHTML = row.transfer_name;
+	item.appendChild(paragraph);
+
+	// Insert text, timestamp, and clearing divs into the page
+	rows.appendChild(timestamp);
+	rows.appendChild(item);
+	rows.appendChild(clearing_div);
+}
+
+/* Takes in an apple timestamp and converts it to a human readable string. Have to add 978307200 to
+   mactime to get unixtime. */
+var timestamp_convertor = function(apple_timestamp){
+	var unix_timestamp = apple_timestamp + 978307200;
+	// Create a new JavaScript Date object based on the timestamp
+	// multiplied by 1000 so that the argument is in milliseconds, not seconds.
+	var date = new Date(unix_timestamp*1000);
+	// day of the week, ex: Thursday
+	var week_day = date.getDay();
+	// day of the month, ex 21st
+	var month_day = date.getDate();
+	var year = date.getFullYear();
+	var month = date.getMonth();
+	// Hours part from the timestamp
+	var hours = date.getHours();
+	// Minutes part from the timestamp
+	var minutes = "0" + date.getMinutes();
+	// Seconds part from the timestamp
+	var seconds = "0" + date.getSeconds();
+
+	// Will display time in "Thursday, January 2017 10:30:23" format
+	var formattedTime = days[week_day] + ", "+ months[month] + " " + month_day + " " + year + " " + hours + ':' + minutes.substr(-2) + ':' + seconds.substr(-2);
+	return formattedTime;
+}
+
+		</script>
+	</body>
+</html>
