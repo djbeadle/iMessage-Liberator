@@ -1,8 +1,8 @@
-<!DOCTYPE html>
 <html>
 	<head>
 		<link rel="stylesheet" type="text/css" href="general.css">
 		<link rel="stylesheet" type="text/css" href="message.css">
+		<link rel="stylesheet" href="lightbox/css/lightbox.css" type="text/css">
 		<link rel="import" href="nav.html">
 		<title>blank</title>
 	</head>
@@ -10,10 +10,14 @@
 		<h1>iMessage Tool</h1>
 		<div id="nav"></div>
 		<button id="print" onclick="print()">print</button>
+		<a id="prior_hundred" href="attachments.html?start=0,num=100">PRIOR</a>
+		<a id="next_hundred" href="attachments.html?start=100,num=100">NEXT</a>
+		<div class="clear"></div>
 		<section>
 			<div id="special">
 			</div>
 		</section>
+		<script>var $ = require('jQuery');</script>
 		<script>
 var sqlite3 = require("sqlite3").verbose();
 const url = require('url').url;
@@ -26,23 +30,29 @@ const Config = require('electron-config');
 const config = new Config();
 
 const cur_url = new URL(window.location.href);
-const chat_identifier = cur_url.searchParams.get("chat_identifier");
+const num = cur_url.searchParams.get("num");
+const start = cur_url.searchParams.get("start");
 const supported_attachment_types = ["image/png", "image/jpeg", "image/gif"];
 const path_to_attachments = "file:///Users/" + config.get("username");
 
 const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
-document.title = chat_identifier;
+document.title = "All attachments";
+
+var next_start = 0;
+var prior_start = 100;
 
 // Print function:
 var print = function(){
-	mainWindow.webContents.printToPDF({}, function(error, data) {
+	window.alert("This does nothing :(");
+	return;
+	/*mainWindow.webContents.printToPDF({}, function(error, data) {
 		if(error) throw error;
 		fs.writeFile(arg, data, function(error) {
 			if(error) throw error;
 		});
-	});
+	});*/
 }
 
 // Load the NavBar before we get into all sorts of disgusting database stuff
@@ -56,100 +66,82 @@ var special = document.getElementById("special");
 var text = document.createElement("b");
 
 window.onload = function() {
-	var external_links = document.getElementsByClassName('.open-in-browser');
-	for(var i = 0; i < external_links.length; i++) {
-		var external_link = external_links[i];
-		external_link.onclick = function() {
-			console.log('ho ho ho');
-		}
-	}
+	var start_number = new Number(start);
+	console.log("asdf:" + start_number);
+	var num_number = new Number(num);
+
+	// update the forward button value:
+	next_start = start_number;
+	next_start += 100;
+	var next_button = document.getElementById("next_hundred");
+	next_button.setAttribute("href", "attachments.html?num=100,start=" + next_start);
+
+	// update the back button value:
+	prior_start = start_number;
+	prior_start -= 100;
+	var prior_button = document.getElementById("prior_hundred");
+	prior_button.setAttribute("href", "attachments.html?num=100,start=" + prior_start);
+
 }   
 
-/* process.stdout.write("----\n");
-   process.stdout.write(cur_url + "\n");
-   process.stdout.write(cur_url.searchParams.get("chat_identifier") + "\n");
-   process.stdout.write("----\n"); */
-
-// Get the messages we want based on the URL paramater    
-/* var chat_id_msgs =
-   " select * from" +
-   " chat join chat_message_join join message" +
-   " where message.ROWID = chat_message_join.message_id" +
-   " AND chat_message_join.chat_id = chat.ROWID" +
-   " AND chat.chat_identifier = '" + chat_identifier + "';"; */
 var all_attachments = 
-   " SELECT" + 
-   " created_date, start_date, filename, mime_type, transfer_state, is_outgoing, transfer_name, total_bytes," + 
-   " is_sticker" + 
-   " FROM attachment;";
+" SELECT" + 
+" created_date, start_date, filename, mime_type, transfer_state, is_outgoing, transfer_name, total_bytes," + 
+" rowid, is_sticker" + 
+" FROM attachment" +
+" WHERE rowid <= " + (start + num) + 
+" AND rowid > " + (start) +
+";";
 
 process.stdout.write("lets go!\n");
+process.stdout.write("start: " + start + "\n");
+process.stdout.write("num: " + num + "\n");
 db.serialize(function() {
-	var rows = document.getElementById("special");
 
 	// Get info about this particular chat
 	db.each(all_attachments, function(err, row){
-		// console.log(row.transfer_name);
-		var paragraph = document.createElement("p");
-		var line_item = document.createElement("a");
-		var text = "";
-		if(row.is_from_me == 1){
-			text += "From me: ";
-		} else {
-			text += "To me: ";
-		}
-		text += " ";
-		text += row.mime_type;
-		text += " ";
-		line_item.setAttribute("href", "" + path_to_attachments + row.filename.substr(1));
-		line_item.innerHTML = text;
-		paragraph.appendChild(line_item);
-		rows.appendChild(paragraph);
-	})
+		add_attachment(err, row);
+	});
 
 });
 
-/* Insert a message onto the page */
-var add_attachment = function(rows, row, last_message_handle){
-	console.log("adding attachments!");
+var add_attachment = function(err, row){
+	var rows = document.getElementById("special");
+	
+	// Each "item" contains the details of each attachemnt
 	var item = document.createElement("div");
+	// link surrounds the image
+	var link = document.createElement("a");
+	// timestamp is above the link inside each item
+	var timestamp = document.createElement("div");
 
-	// Time message was delivered, if available.
+	// build the timestamp
 	var delivered_appletime = row.created_date;
 	var delivered_humantime;
 	if(delivered_appletime == 0){
-		delivered_humantime = "?";
+		derlivered_humantime = "?";
 	} else {
 		delivered_humantime = timestamp_convertor(delivered_appletime);
 	}
 
+	timestamp.innerText = delivered_humantime;
+	item.appendChild(timestamp);
 
-	// Create clearing div
+	// space in between the images 
 	var clearing_div = document.createElement("div");
 	clearing_div.setAttribute("class", "clear");
 
-	// create timestamp
-	var timestamp = document.createElement("div");
-	timestamp.innerText = delivered_humantime + " / " + read_humantime
-
-		// set classes based on who the message is from
-		// 1 if from me, 0 if not. 
-		if(row.is_from_me == 1){
-			item.setAttribute("class", "me"); 
-			timestamp.setAttribute("class", "timestamp_me");
-		} else {
-			item.setAttribute("class", "other"); 
-			timestamp.setAttribute("class", "timestamp_other");
-		}
-
-	// handle normal messages
-	var paragraph = document.createElement("a");
-	paragraph.setAttribute("src", row.filename);
-	paragraph.innerHTML = row.transfer_name;
-	item.appendChild(paragraph);
-
-	// Insert text, timestamp, and clearing divs into the page
-	rows.appendChild(timestamp);
+	// the preview of the attachment, if we can. 
+	// Un-comment this line to view the full image by clicking on it.
+	// link.setAttribute("href", path_to_attachments + row.filename.substr(1));
+	if(row.mime_type != null && supported_attachment_types.indexOf(row.mime_type) != -1){	
+		var preview = document.createElement("img");
+		preview.setAttribute("src", path_to_attachments + row.filename.substr(1));
+		link.appendChild(preview);
+		item.appendChild(link);
+	} else {
+		item.textContent = row.transfer_name;
+	} 
 	rows.appendChild(item);
 	rows.appendChild(clearing_div);
 }
